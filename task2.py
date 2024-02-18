@@ -17,9 +17,9 @@ class FormSpider(scrapy.Spider):
         )
 
     def form_filled(self, response):
-        rows = response.css("tr.team")
+        rows = response.xpath("//tr[contains(@class, 'team')]")
         for row in rows:
-            values = row.css('td::text').getall()
+            values = row.xpath('td/text()').getall()
             values = [x.strip() for x in values]
             yield dict(zip(keys, values))
 
