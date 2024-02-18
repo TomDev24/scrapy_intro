@@ -2,7 +2,7 @@
 
 ## Task 1 (Ajax)
 
-While in task1/ folder execute `scrapy crawl movie`
+While in task1/ folder execute `scrapy crawl movies -O movies.json`
 
 ## Task 2 (Html form)
 

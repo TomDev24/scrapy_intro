@@ -4,9 +4,11 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from scrapy.http import TextResponse
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+import aiohttp
 
 
 class Task1SpiderMiddleware:
@@ -68,7 +70,7 @@ class Task1DownloaderMiddleware:
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
         return s
 
-    def process_request(self, request, spider):
+    async def process_request(self, request, spider):
         # Called for each request that goes through the downloader
         # middleware.
 
@@ -78,9 +80,19 @@ class Task1DownloaderMiddleware:
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
-        return None
+        async with aiohttp.ClientSession() as session:
+            async with session.get(request.url) as resp:
+                data = await resp.text()
 
-    def process_response(self, request, response, spider):
+        return TextResponse(
+            body=data,
+            url=request.url,
+            encoding='utf-8'
+            #headers=request.headers,
+            #request=request
+        )
+
+    async def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.
 
         # Must either;
@@ -89,7 +101,7 @@ class Task1DownloaderMiddleware:
         # - or raise IgnoreRequest
         return response
 
-    def process_exception(self, request, exception, spider):
+    async def process_exception(self, request, exception, spider):
         # Called when a download handler or a process_request()
         # (from other downloader middleware) raises an exception.
 
